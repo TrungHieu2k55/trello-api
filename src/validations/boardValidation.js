@@ -9,10 +9,10 @@ const createNew = async (req, res, next) => {
 
   try {
     console.log(req.body)
-
+    // abortEarly trả về tất cả lỗi
     await correctCondition.validateAsync(req.body, { abortEarly: false })
-    // next()
-    res.status(StatusCodes.CREATED).json({ message: 'POST Validation: API create new broad.' })
+    // Validation dữ liệu hợp lệ thì cho request sang controller
+    next()
   } catch (error) {
     console.log(error)
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
