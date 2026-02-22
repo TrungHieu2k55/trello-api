@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-catch */
 import ApiError, {} from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
+import { boardModel } from '~/models/boardModel'
 
 const createNew = async (reqBody) => {
   try {
@@ -12,8 +13,13 @@ const createNew = async (reqBody) => {
 
 
     //Gọi tới tầng model để xử lý lưu bản ghi newBoard vào trong database
+    const createdBoard = await boardModel.createNew(newBoard)
 
-    return newBoard
+
+    //Lấy bảng board sau khi gọi
+    const getNewBoard = await boardModel.findOneById(createdBoard.insertedId)
+
+    return getNewBoard
   } catch (error) {
     throw error
   }
