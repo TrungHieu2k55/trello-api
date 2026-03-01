@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-catch */
 import ApiError, {} from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
 import { boardModel } from '~/models/boardModel'
