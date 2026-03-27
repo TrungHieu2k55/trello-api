@@ -96,8 +96,31 @@ const update = async (boardId, updateData) => {
         delete updateData[fieldName]
       }
     })
+
+    if (updateData.columnOrderIds) {
+      updateData.columnOrderIds = updateData.columnOrderIds.map(_id => (new ObjectId(_id)))
+    }
+
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(boardId) },
+      { $set: updateData },
+      { ReturnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
+    )
+    return result
+  } catch (error) { throw new Error(error)}
+}
+
+
+const moveCardToDifferentColumn = async (updateData) => {
+  try {
+    // Lọc field ko cho phép cập nhật linh tinh
+    Object.keys(updateData).forEach(fieldName => {
+      if (INVALID_UPDATE_FIELD.includes(fieldName)) {
+        delete updateData[fieldName]
+      }
+    })
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(updateData.f) },
       { $set: updateData },
       { ReturnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
     )
@@ -112,5 +135,6 @@ export const boardModel = {
   findOneById,
   getDetails,
   pushColumnOrderIds,
-  update
+  update,
+  // moveCardToDifferentColumn
 }
