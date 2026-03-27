@@ -3,6 +3,8 @@ import { slugify } from '~/utils/formatters'
 import { boardModel } from '~/models/boardModel'
 import { StatusCodes } from 'http-status-codes'
 import { cloneDeep } from 'lodash'
+import { columnModel } from '~/models/columnModel'
+import { cardModel } from '~/models/cardModel'
 
 const createNew = async (reqBody) => {
   try {
@@ -48,7 +50,6 @@ const getDetails = async (boardId) => {
 
 const update = async (boardId, reqBody) => {
   try {
-    //
     const updateData = {
       ...reqBody,
       updateAt: Date.now()
@@ -58,8 +59,33 @@ const update = async (boardId, reqBody) => {
   } catch (error) {throw error}
 }
 
+//Update card trong các column trong một board
+const moveCardToDifferentColumn = async (reqBody) => {
+  try {
+    // cập nhập xóa card khỏi column cũ
+    await columnModel.update(reqBody.prevColumnId, {
+      cardOrderIds: reqBody.prevCardOrderIds,
+      updatedAt: Date.now()
+    })
+    // cập nhập card vào column mới
+    await columnModel.update(reqBody.nextColumnId, {
+      cardOrderIds: reqBody.nextCardOrderIds,
+      updatedAt: Date.now()
+    })
+
+    //Cập nhập columnId mới trong card
+    await cardModel.update(reqBody.currentCardId, {
+      columnId: reqBody.nextColumnId,
+      updatedAt: Date.now()
+    })
+
+    return { updateResult: 'Successfully' }
+  } catch (error) {throw error}
+}
+
 export const boardService = {
   createNew,
   getDetails,
-  update
+  update,
+  moveCardToDifferentColumn
 }
