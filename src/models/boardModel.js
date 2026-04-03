@@ -88,6 +88,18 @@ const pushColumnOrderIds = async (column) => {
   } catch (error) { throw new Error(error)}
 }
 
+//Dùng pull trong mongoDb để lấy ra pt trong mảng rồi xóa
+const pullColumnOrderIds = async (column) => {
+  try {
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(column.boardId) },
+      { $pull: { columnOrderIds: new ObjectId(column._id) } },
+      { ReturnDocument: 'after' }
+    )
+    return result
+  } catch (error) { throw new Error(error)}
+}
+
 const update = async (boardId, updateData) => {
   try {
     // Lọc field ko cho phép cập nhật linh tinh
@@ -136,5 +148,6 @@ export const boardModel = {
   getDetails,
   pushColumnOrderIds,
   update,
-  // moveCardToDifferentColumn
+  moveCardToDifferentColumn,
+  pullColumnOrderIds
 }
