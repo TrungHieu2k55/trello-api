@@ -22,15 +22,17 @@ const START_SERVER = () => {
   //Middleware xử lý lỗi tập trung
   app.use(errorHandlingMiddleware)
 
-  app.get('/', async (req, res) => {
-    console.log( await GET_DB().listCollections().toArray())
-
-    res.end('<h1>Hello World!</h1><hr>')
-  })
-
-  app.listen(env.APP_PORT, env.APP_HOST, () => {
-    console.log(`Hello, Backend Server running at ${ env.APP_HOST }:${ env.APP_PORT }/`)
-  })
+  // Môi trường production (cụ thể hiện tại là đang support render)
+  if (env.BUILD_MODE === 'production') {
+    app.listen(process.env.PORT, () => {
+      console.log(`Hello, Backend Server running at port  ${ process.env.PORT}/`)
+    })
+  } else {
+    // Môi trường trên dev
+    app.listen(env.LOCAL_DEV_APP_PORT, env.LOCAL_DEV_APP_HOST, () => {
+      console.log(`Hello, Backend Server running at ${ env.LOCAL_DEV_APP_HOST }:${ env.LOCAL_DEV_APP_PORT }/`)
+    })
+  }
 
   // Cleanup trước khi dừng server
   // https://stackoverflow.com/questions/14031763/doing-a-cleanup-action-just-before-node-js-exits
