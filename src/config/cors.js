@@ -19,6 +19,9 @@ export const corsOptions = {
     // Cuối cùng nếu domain không được chấp nhận thì trả về lỗi
     return callback(new ApiError(StatusCodes.FORBIDDEN, `${origin} not allowed by our CORS Policy.`))
   },
+  // Cho phép trình duyệt gửi Cookie/Session cùng với request
+  // Đồng thời backend sẽ trả về:
+  credentials: true,
 
   // Some legacy browsers (IE11, various SmartTVs) choke on 204
   optionsSuccessStatus: 200
