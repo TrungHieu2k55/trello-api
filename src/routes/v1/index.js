@@ -22,7 +22,7 @@ Router.use('/columns', columnRouter)
 Router.use('/cards', cardRouter)
 
 // User APIs
-Router.use('/register', userRoute)
+Router.use('/users', userRoute)
 
 
 export const APIs_V1 = Router

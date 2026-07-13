@@ -2,7 +2,6 @@ import Joi from 'joi'
 import { EMAIL_RULE, EMAIL_RULE_MESSAGE } from '~/utils/validator'
 import { GET_DB } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
-import e from 'express'
 
 const USER_ROLES = {
   CLIENT: 'client',
@@ -29,7 +28,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
 
 const INVALID_UPDATE_FIELDS = ['_id', 'email', 'username', 'createAt']
 
-const validateBeforeCreate = async (data) =>{
+const validateBeforeCreate = async (data) => {
   return await USER_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
 }
 
