@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes'
 import { EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validator'
 
 const createNew = async(req, res, next) => {
+  console.log('test vào login')
   const correctCondition = Joi.object({
     email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
     password: Joi.string().required().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE)
@@ -33,6 +34,7 @@ const verifyAccount = async (req, res, next) => {
 }
 
 const login = async (req, res, next) => {
+  console.log('1')
   const correctCondition = Joi.object({
     email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
     password: Joi.string().required().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE)
