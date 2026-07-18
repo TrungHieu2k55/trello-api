@@ -21,8 +21,7 @@ const isAuthorized = async (req, res, next) => {
     next()
   } catch (error) {
     if (error?.message?.includes('jwt expired')) {
-      next(new ApiError(StatusCodes.GONE, 'Need to refresh token.'))
-      return
+      return next(new ApiError(StatusCodes.GONE, 'Need to refresh token.'))
     }
 
     next(new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized! (Token not found)'))
