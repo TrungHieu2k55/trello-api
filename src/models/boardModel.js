@@ -5,6 +5,7 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validator'
 import { BOARD_TYPES } from '~/utils/constants'
 import { columnModel } from '~/models/columnModel'
 import { cardModel } from '~/models/cardModel'
+import { pagingSkipValue } from '~/utils/algorithms'
 
 // Define Collection (Name & Schema)
 const BOARD_COLLECTION_NAME = 'boards'
@@ -17,6 +18,14 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
 
   // Lưu ý các item trong mảng cardOrderIds là ObjectId nên cần thêm pattern cho chuẩn
   columnOrderIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
+
+  ownerIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
+
+  memberIds: Joi.array().items(
     Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
   ).default([]),
 
@@ -116,7 +125,7 @@ const update = async (boardId, updateData) => {
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(boardId) },
       { $set: updateData },
-      { ReturnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
+      { returnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
     )
     return result
   } catch (error) { throw new Error(error)}
@@ -140,6 +149,39 @@ const moveCardToDifferentColumn = async (updateData) => {
   } catch (error) { throw new Error(error)}
 }
 
+const getBoards = async (userId, page, itemsPerPage) => {
+  try {
+    const queryConditions = [
+      { _destroy: false },
+      { $or: [
+        { ownerIds: { $all: [new ObjectId(userId)] } },
+        { memberIds: { $all: [new ObjectId(userId)] } }
+      ] }
+    ]
+
+    const query = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
+      { $match: { $and: queryConditions } },
+      { $sort: { title: 1 } },
+      { $facet: {
+        // Query Board
+        'queryBoards': [
+          { $skip: pagingSkipValue(page, itemsPerPage) },
+          { $limit: itemsPerPage }
+        ],
+        // Query đếm tất cả số lượng bản ghi boards trong DB trả về
+        'queryTotalBoards': [{ $count : 'countedAllBoards' }]
+      } }
+    ],
+    { collation: { locale: 'en' } }
+    ).toArray()
+
+    return {
+      boards: query[0].queryBoards || [],
+      totalBoards: query[0].queryTotalBoards[0]?.countedAllBoards || 0
+    }
+  } catch (error) { throw new Error(error)}
+}
+
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
@@ -149,5 +191,6 @@ export const boardModel = {
   pushColumnOrderIds,
   update,
   moveCardToDifferentColumn,
-  pullColumnOrderIds
+  pullColumnOrderIds,
+  getBoards
 }

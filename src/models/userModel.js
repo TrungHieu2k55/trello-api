@@ -26,7 +26,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
-const INVALID_UPDATE_FIELDS = ['_id', 'email', 'username', 'createAt']
+const INVALID_UPDATE_FIELDS = ['_id', 'email', 'userName', 'createAt']
 
 const validateBeforeCreate = async (data) => {
   return await USER_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
@@ -66,12 +66,12 @@ const update = async (userId, updateData) => {
       }
     })
 
-
     const result = await GET_DB().collection(USER_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $set: updateData },
-      { ReturnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
+      { returnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
     )
+
     return result
   } catch (error) { throw new Error(error)}
 }

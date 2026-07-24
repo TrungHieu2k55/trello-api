@@ -8,6 +8,8 @@ import { WEBSITE_DOMAIN } from '~/utils/constants'
 import { ResendProvider } from '~/providers/ResendProvider'
 import { env } from '~/config/environment'
 import { JwtProvider } from '~/providers/JwtProvider'
+import { CloudinaryProvider } from '~/providers/CloudinaryProvider'
+
 
 const createNew = async(reqBody) => {
   try {
@@ -117,11 +119,56 @@ const refreshToken = async(clientRefreshToken) => {
     const accessToken = await JwtProvider.generateToken(
       userInfo,
       env.ACCESS_TOKEN_SECRET_SIGNATURE,
-      // env.ACCESS_TOKEN_LIFE //
-      5
+      env.ACCESS_TOKEN_LIFE //
     )
 
     return { accessToken }
+  } catch (error) {
+    throw error
+  }
+}
+
+const update = async (userId, reqBody, userAvatarFile) => {
+  try {
+    // Query User và kiểm tra cho chắc chắn
+    const existUser = await userModel.findOneById(userId)
+
+    if (!existUser)
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
+
+    if (!existUser.isActive)
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not active!')
+
+    // Khởi tạo kết quả updated User ban đầu là empty
+    let updatedUser = {}
+
+    // Trường hợp change password
+    if (reqBody.current_password && reqBody.new_password) {
+      // Kiểm tra xem cái current_password có đúng hay không
+      if (!bcryptjs.compareSync(reqBody.current_password, existUser.password)
+      ) {
+        throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your Current Password is incorrect!')
+      }
+
+      // Nếu như current_password là đúng thì chúng ta sẽ hash một cái mật khẩu mới và update lại vào DB:
+      updatedUser = await userModel.update(existUser._id, {
+        password: bcryptjs.hashSync(reqBody.new_password, 8)
+      })
+    } else if (userAvatarFile) {
+      const uploadResult = await CloudinaryProvider.streamUpload(userAvatarFile.buffer, 'users')
+
+      // Lưu url vào database
+      updatedUser = await userModel.update(existUser._id, {
+        avatar: uploadResult.secure_url
+      })
+    } else {
+      // Trường hợp update các thông tin chung, ví dụ như displayName
+      // console.log(reqBody)
+      updatedUser = await userModel.update(existUser._id, reqBody)
+      // console.log('pickUser1', updatedUser)
+    }
+    // console.log('pickUser2', updatedUser)
+    return pickUser(updatedUser)
   } catch (error) {
     throw error
   }
@@ -131,5 +178,6 @@ export const userService = {
   createNew,
   verifyAccount,
   login,
-  refreshToken
+  refreshToken,
+  update
 }
