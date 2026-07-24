@@ -75,7 +75,7 @@ const update = async (columnId, updateData) => {
     const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(columnId) },
       { $set: updateData },
-      { ReturnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
+      { returnDocument: 'after' } // sẽ trả về kết quả mới sau khi cập nhật
     )
     return result
   } catch (error) { throw new Error(error)}
