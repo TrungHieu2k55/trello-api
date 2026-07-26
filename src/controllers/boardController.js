@@ -6,9 +6,9 @@ const createNew = async (req, res, next) => {
 
   try {
     // console.log(req.body)
-
+    const userId = req.jwtDecoded.id
     // Điều hướng dữ liệu sang tầng Services
-    const createdBoard = await boardService.createNew(req.body)
+    const createdBoard = await boardService.createNew(userId, req.body)
 
     // Có kết quả trả về về phía client
     res.status(StatusCodes.CREATED).json(createdBoard)
@@ -17,8 +17,9 @@ const createNew = async (req, res, next) => {
 
 const getDetails = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded.id
     const boardId = req.params.id
-    const board = await boardService.getDetails(boardId)
+    const board = await boardService.getDetails(userId, boardId)
 
     res.status(StatusCodes.OK).json(board)
   } catch (error) { next(error) }

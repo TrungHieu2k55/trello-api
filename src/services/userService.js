@@ -111,7 +111,7 @@ const refreshToken = async(clientRefreshToken) => {
     // Verify refresh token
     const refreshTokenDecoded = await JwtProvider.verifyToken(clientRefreshToken, env.REFRESH_TOKEN_SECRET_SIGNATURE)
     const userInfo = {
-      _id: refreshTokenDecoded._id,
+      id: refreshTokenDecoded.id,
       email: refreshTokenDecoded.email
     }
 
