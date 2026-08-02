@@ -45,6 +45,7 @@ const getDetails = async (userId, boardId) => {
     })
     delete resBoard.cards
 
+    // console.log('kiểm tra', resBoard.columns[0].cards)
     return resBoard
   } catch (error) {throw error}
 }

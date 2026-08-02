@@ -9,6 +9,9 @@ import { APIs_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
 import cookieParser from 'cookie-parser'
 
+import socketIo from 'socket.io'
+import http from 'http'
+
 const START_SERVER = () => {
   const app = express()
 
@@ -32,14 +35,26 @@ const START_SERVER = () => {
   //Middleware xử lý lỗi tập trung
   app.use(errorHandlingMiddleware)
 
+  // Tạo server mới bọc express làm realtime
+  const server = http.createServer(app)
+  // Khởi tạo biến io với server và cors
+  const io = socketIo(server, { cors: corsOptions })
+  io.on('connection', (socket) => {
+    // Lắng nghe sự kiện emit gửi lên
+    socket.on('FE_USER_INVITED_TO_BOARD', (invitation) => {
+      socket.broadcast.emit('BE_USER_INVITED_TO_BOARD', invitation)
+    })
+  })
+
   // Môi trường production (cụ thể hiện tại là đang support render)
+  // Dùng server thay vì app vì bao gồm express và socketIo
   if (env.BUILD_MODE === 'production') {
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`Hello, Backend Server running at port  ${ process.env.PORT}/`)
     })
   } else {
     // Môi trường trên dev
-    app.listen(env.LOCAL_DEV_APP_PORT, env.LOCAL_DEV_APP_HOST, () => {
+    server.listen(env.LOCAL_DEV_APP_PORT, env.LOCAL_DEV_APP_HOST, () => {
       console.log(`Hello, Backend Server running at ${ env.LOCAL_DEV_APP_HOST }:${ env.LOCAL_DEV_APP_PORT }/`)
     })
   }
