@@ -28,6 +28,8 @@ const START_SERVER = () => {
   app.use(cors(corsOptions))
   //Enable json data
   app.use(express.json())
+  // Dùng qs để parse query dạng bracket (q[title]=dsa) thành nested object
+  app.set('query parser', 'extended')
 
   //Use APIs v1
   app.use('/v1', APIs_V1)
